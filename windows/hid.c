@@ -234,6 +234,21 @@ static HANDLE open_device(const char *path, BOOL enumerate)
 		FILE_FLAG_OVERLAPPED,/*FILE_ATTRIBUTE_NORMAL,*/
 		0);
 
+	if (handle == INVALID_HANDLE_VALUE) {
+	    /* Couldn't open the device. Some devices (like the Olympus
+	    footswitches) must be opened with sharing enabled (even though 
+	    they are only opened once), so try it here. 
+	    @url https://github.com/signal11/hidapi/issues/138#issuecomment-55654276
+	    */
+	    handle = CreateFileA(path,
+	        desired_access,
+	        FILE_SHARE_READ | FILE_SHARE_WRITE, /*share mode*/
+	        NULL,
+	        OPEN_EXISTING,
+	        FILE_FLAG_OVERLAPPED,//FILE_ATTRIBUTE_NORMAL,
+	        0);
+	}
+
 	return handle;
 }
 
